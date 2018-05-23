@@ -1,0 +1,44 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[RequireComponent(typeof(CharacterController))]
+public class PlayerMovement : MonoBehaviour
+{
+    public float rotationSpeed = 15f;
+    public float moveSpeed = 3f;
+    private float playerSpeedX;
+
+    private Animator anim;
+
+    CharacterController motor;
+
+    Quaternion desiredRotation;
+
+    private void Start()
+    {
+        anim = GetComponent<Animator>();
+        motor = GetComponent<CharacterController>();
+        desiredRotation = transform.rotation;
+    }
+
+    private void Update()
+    {
+        float inputX = Input.GetAxis("Horizontal");
+        float inputY = Input.GetAxis("Vertical");
+        playerSpeedX = Input.GetAxisRaw("Vertical");
+
+        Vector3 moveDir = (Camera.main.transform.forward * inputY) + (Camera.main.transform.right * inputX);
+        moveDir.y = 0f;
+        moveDir.Normalize();
+
+        if (moveDir != Vector3.zero)
+            desiredRotation = Quaternion.LookRotation(moveDir);
+
+        transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, rotationSpeed * Time.deltaTime);
+
+        motor.Move(moveDir * moveSpeed * Time.deltaTime);
+        anim.SetFloat("Speed", playerSpeedX); 
+    }
+
+}
