@@ -1,0 +1,50 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CameraScript : MonoBehaviour {
+
+    //Minimum and Maximum angle for Y rotation of the camera.
+    private const float Y_ANGLE_MIN = 0.0f;
+    private const float Y_ANGLE_MAX = 50.0f;
+
+    //Transforms of the camera's focal point and the camera itself.
+    public Transform cameraFocus;
+    public Transform camTransform;
+
+    private Camera cam;
+
+    //Defined floats for distance from player object, current rotation of the camera on the X and Y as well as the sensitivity of Camera movement.
+    public float distance = 3.0f;
+    private float currentX;
+    private float currentY;
+    public float sensitivityX = 2.0f;
+    public float sensitivityY = 2.0f;
+
+    //Assign current object this script is attached to as the camTransform Transform; set cam to equal the Camera in the scene that is tagged "MainCamera".
+    private void Start()
+    {
+        camTransform = transform;
+        cam = Camera.main;
+    }
+
+    //Movement of the Camera on the X and Y.
+    private void Update()
+    {
+        currentX += Input.GetAxis("Mouse X") * sensitivityX;
+        currentY += Input.GetAxis("Mouse Y") * sensitivityY;
+
+        //Clamps the Y rotation of the Camera to prevent clipping and full vertical rotation.
+        currentY = Mathf.Clamp(currentY, Y_ANGLE_MIN, Y_ANGLE_MAX);
+    }
+
+    private void LateUpdate()
+    {
+        //Set the offset of the camera to keep it "distance" away from the player Object; set a rotation variable equal to the current rotation of the Camera; Set the current position of the camera to equal the position of the Player Object plus the rotation and multiplied by the distance.
+        Vector3 dir = new Vector3(0, 0, -distance);
+        Quaternion rotation = Quaternion.Euler(currentY, currentX, 0);
+        camTransform.position = cameraFocus.position + rotation * dir;
+        camTransform.LookAt(cameraFocus.position);
+    }
+
+}
