@@ -6,8 +6,10 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public float rotationSpeed = 15f;
-    public float moveSpeed = 3f;
-    private float playerSpeedX;
+    public float speed = 8f;
+    public Vector3 velocity;
+    public float moveSpeed;
+    private float maxSpeed = 8f;
 
     private Animator anim;
 
@@ -24,21 +26,33 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        float inputX = Input.GetAxis("Horizontal");
-        float inputY = Input.GetAxis("Vertical");
-        playerSpeedX = Input.GetAxisRaw("Vertical");
+        velocity = motor.velocity;
+        float inputX = Input.GetAxisRaw("Horizontal");
+        float inputY = Input.GetAxisRaw("Vertical");
 
         Vector3 moveDir = (Camera.main.transform.forward * inputY) + (Camera.main.transform.right * inputX);
         moveDir.y = 0f;
         moveDir.Normalize();
+        
 
         if (moveDir != Vector3.zero)
+        {
             desiredRotation = Quaternion.LookRotation(moveDir);
+            moveSpeed = (Mathf.Abs(inputX) + Mathf.Abs(inputY)) * speed;
+            moveSpeed = Mathf.Abs(moveSpeed);
+        }
+        else
+        {
+            moveSpeed = 0;
+        }
+
+        if (moveSpeed >= maxSpeed)
+            moveSpeed = maxSpeed;
 
         transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, rotationSpeed * Time.deltaTime);
 
         motor.Move(moveDir * moveSpeed * Time.deltaTime);
-        anim.SetFloat("Speed", playerSpeedX); 
+        anim.SetFloat("Speed", moveSpeed); 
     }
 
 }
